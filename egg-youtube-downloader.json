@@ -2,7 +2,7 @@
   "meta": {
     "version": "PTDL_v2",
     "name": "YouTube Downloader",
-    "author": "anouk@oldenburg.me",
+    "author": "mail@example.com",
     "description": "Installiert einen Discord YouTube Downloader Bot mit yt-dlp und ffmpeg.",
     "docker_images": {
         "Python 3.13": "ghcr.io/ptero-eggs/yolks:python_3.13",
@@ -14,7 +14,7 @@
   "exported_at": "2025-09-13T17:00:00+00:00",
   "name": "YouTube Downloader Bot",
   "description": "Installiert einen Discord YouTube Downloader Bot mit yt-dlp und ffmpeg.",
-  "author": "anouk@oldenburg.me",
+  "author": "mail@example.com",
   "startup": "if [[ ! -z \"{{PY_PACKAGES}}\" ]]; then pip install -U --prefix .local {{PY_PACKAGES}}; fi; if [[ -f /home/container/${REQUIREMENTS_FILE} ]]; then pip install -U --prefix .local -r ${REQUIREMENTS_FILE}; fi; echo \"username=${SMB_USERNAME}\" > credentials; echo \"password=${SMB_PASSWORD}\" >> credentials; /usr/local/bin/python /home/container/{{PY_FILE}}",
   "features": null,
   "docker_images": {
