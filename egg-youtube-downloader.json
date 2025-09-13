@@ -1,58 +1,51 @@
 {
+  "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
   "meta": {
     "version": "PTDL_v2",
-    "name": "YouTube Downloader",
-    "author": "mail@example.com",
-    "description": "Installiert einen Discord YouTube Downloader Bot mit yt-dlp und ffmpeg.",
-    "docker_images": {
-        "Python 3.13": "ghcr.io/ptero-eggs/yolks:python_3.13",
-        "Python 3.12": "ghcr.io/ptero-eggs/yolks:python_3.12",
-        "Python 3.11": "ghcr.io/ptero-eggs/yolks:python_3.11",
-        "Python 3.10": "ghcr.io/ptero-eggs/yolks:python_3.10"
-    }
+    "update_url": "https:\/\/raw.githubusercontent.com\/AlmarBlock\/YouTube-Downloader-Pterodactyl\/refs\/heads\/main\/egg-youtube-downloader.json"
   },
-  "exported_at": "2025-09-13T17:00:00+00:00",
-  "name": "YouTube Downloader Bot",
+  "exported_at": "2025-09-14T01:20:04+02:00",
+  "name": "YouTube Downloader",
+  "author": "anouk@oldenburg.me",
   "description": "Installiert einen Discord YouTube Downloader Bot mit yt-dlp und ffmpeg.",
-  "author": "mail@example.com",
-  "startup": "if [[ ! -z \"{{PY_PACKAGES}}\" ]]; then pip install -U --prefix .local {{PY_PACKAGES}}; fi; if [[ -f /home/container/${REQUIREMENTS_FILE} ]]; then pip install -U --prefix .local -r ${REQUIREMENTS_FILE}; fi; echo \"username=${SMB_USERNAME}\" > credentials; echo \"password=${SMB_PASSWORD}\" >> credentials; /usr/local/bin/python /home/container/{{PY_FILE}}",
   "features": null,
   "docker_images": {
-    "Python 3.13": "ghcr.io/ptero-eggs/yolks:python_3.13",
-    "Python 3.12": "ghcr.io/ptero-eggs/yolks:python_3.12",
-    "Python 3.11": "ghcr.io/ptero-eggs/yolks:python_3.11",
-    "Python 3.10": "ghcr.io/ptero-eggs/yolks:python_3.10"
+    "Python 3.13": "ghcr.io\/ptero-eggs\/yolks:python_3.13",
+    "Python 3.12": "ghcr.io\/ptero-eggs\/yolks:python_3.12",
+    "Python 3.11": "ghcr.io\/ptero-eggs\/yolks:python_3.11",
+    "Python 3.10": "ghcr.io\/ptero-eggs\/yolks:python_3.10"
   },
+  "file_denylist": [],
+  "startup": "if [[ -d .git ]] && [[ \"{{AUTO_UPDATE}}\" == \"1\" ]]; then git pull; fi; if [[ -f \/home\/container\/{{REQUIREMENTS_FILE}} ]]; then pip install -U --prefix .local -r {{REQUIREMENTS_FILE}}; fi; echo \"username={{SMB_USERNAME}}\" > credentials; echo \"password={{SMB_PASSWORD}}\" >> credentials; \/usr\/local\/bin\/python \/home\/container\/{{PY_FILE}}",
   "config": {
     "files": "{}",
-    "startup": "{\r\n    \"done\": \"change this part\"\r\n}",
+    "startup": "{\r\n  \"done\": \"Done\"\r\n}",
     "logs": "{}",
     "stop": "^C"
   },
-  "environment": [],
   "scripts": {
     "installation": {
-      "script": "#!/bin/bash\r\napt update\r\napt-get install -y ffmpeg python3 python3-pip cifs-utils wget\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\npip install -U --prefix .local discord.py\r\npip install -U --prefix .local aiohttp\r\n\r\nwget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp\r\nchmod +x yt-dlp\r\n\r\ntouch logs.log\r\ntouch credentials\r\necho \"username=${SMB_USERNAME}\" >> credentials\r\necho \"password=${SMB_PASSWORD}\" >> credentials\r\n\r\nmkdir -p media/\r\n\r\necho \"Installing python requirements into folder\"\r\nif [[ ! -z ${PY_PACKAGES} ]]; then\r\n    pip install -U --prefix .local ${PY_PACKAGES}\r\nfi\r\n\r\nif [ -f /mnt/server/requirements.txt ]; then\r\n    pip install -U --prefix .local -r ${REQUIREMENTS_FILE}\r\nfi\r\n\r\necho -e \"install complete\"\r\nexit 0",
+      "script": "#!\/bin\/bash\r\napt update\r\napt-get install -y ffmpeg python3 python3-pip cifs-utils wget git\r\necho \"Clearing Home-Folder\"\r\nrm -rf \/home\/container\/\r\nrm -rf \/mnt\/server\r\nls -A\r\n\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\necho \"Download from GitHub\"\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n  GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\n## pull git python repo\r\nif [ \"$(ls -A \/mnt\/server)\" ]; then\r\n  echo -e \"\/mnt\/server directory is not empty.\"\r\n  if [ -d .git ]; then\r\n    echo -e \".git directory exists\"\r\n    if [ -f .git\/config ]; then\r\n      echo -e \"loading info from git config\"\r\n      ORIGIN=$(git config --get remote.origin.url)\r\n    else\r\n      echo -e \"files found with no git config\"\r\n      echo -e \"closing out without touching things to not break anything\"\r\n      exit 10\r\n    fi\r\n  fi\r\n\r\n  if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n    echo \"pulling latest from github\"\r\n    git pull\r\n  fi\r\nelse\r\n  echo -e \"\/mnt\/server is empty.\\ncloning files into repo\"\r\n  echo -e \"cloning default branch\"\r\n  git clone ${GIT_ADDRESS} .\r\n\r\nfi\r\n\r\npwd\r\nls -Al\r\n\r\necho \"Downloading yt-dlp\"\r\nwget https:\/\/github.com\/yt-dlp\/yt-dlp\/releases\/latest\/download\/yt-dlp\r\nchmod +x yt-dlp\r\n\r\ntouch logs.log\r\ntouch credentials\r\necho \"username=${SMB_USERNAME}\" > credentials\r\necho \"password=${SMB_PASSWORD}\" >> credentials\r\n\r\nif [ -f \/home\/container\/requirements.txt ]; then\r\n  pip install -U --prefix .local -r \/home\/container\/requirements.txt\r\nfi\r\n\r\necho \"Removing Egg JSON\"\r\nrm egg-youtube-downloader.json\r\n\r\nexport HOME=\/mnt\/server\r\n\r\necho -e \"install complete\"\r\nexit 0",
       "container": "python:3.8-slim-bookworm",
       "entrypoint": "bash"
     }
   },
   "variables": [
     {
-      "name": "User Uploaded Files",
-      "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
-      "env_variable": "USER_UPLOAD",
-      "default_value": "0",
+      "name": "Git Repo Address",
+      "description": "Git repo to clone\r\n\r\nI.E. https:\/\/github.com\/parkervcp\/repo_name",
+      "env_variable": "GIT_ADDRESS",
+      "default_value": "https:\/\/github.com\/AlmarBlock\/YouTube-Downloader-Pterodactyl",
       "user_viewable": true,
-      "user_editable": true,
-      "rules": "required|boolean",
+      "user_editable": false,
+      "rules": "nullable|string",
       "field_type": "text"
     },
     {
       "name": "Auto Update",
       "description": "Pull the latest files on startup when using a GitHub repo.",
       "env_variable": "AUTO_UPDATE",
-      "default_value": "0",
+      "default_value": "1",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
@@ -62,20 +55,10 @@
       "name": "App py file",
       "description": "The file that starts the App.",
       "env_variable": "PY_FILE",
-      "default_value": "app.py",
+      "default_value": "discordPart.py",
       "user_viewable": true,
-      "user_editable": true,
+      "user_editable": false,
       "rules": "required|string",
-      "field_type": "text"
-    },
-    {
-      "name": "Additional Python packages",
-      "description": "Install additional python packages.\r\n\r\nUse spaces to separate",
-      "env_variable": "PY_PACKAGES",
-      "default_value": "",
-      "user_viewable": true,
-      "user_editable": true,
-      "rules": "nullable|string",
       "field_type": "text"
     },
     {
@@ -134,7 +117,7 @@
       "env_variable": "REQUIREMENTS_FILE",
       "default_value": "requirements.txt",
       "user_viewable": true,
-      "user_editable": true,
+      "user_editable": false,
       "rules": "required|string",
       "field_type": "text"
     }
