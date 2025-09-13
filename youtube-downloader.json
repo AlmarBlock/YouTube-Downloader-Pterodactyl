@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "version": "PTDL_v2",
+    "name": "YouTube Downloader",
+    "author": "anouk@oldenburg.me",
+    "description": "Installiert einen Discord YouTube Downloader Bot mit yt-dlp und ffmpeg.",
+    "docker_images": {
+        "Python 3.13": "ghcr.io/ptero-eggs/yolks:python_3.13",
+        "Python 3.12": "ghcr.io/ptero-eggs/yolks:python_3.12",
+        "Python 3.11": "ghcr.io/ptero-eggs/yolks:python_3.11",
+        "Python 3.10": "ghcr.io/ptero-eggs/yolks:python_3.10"
+    }
+  },
+  "exported_at": "2025-09-13T17:00:00+00:00",
+  "name": "YouTube Downloader Bot",
+  "description": "Installiert einen Discord YouTube Downloader Bot mit yt-dlp und ffmpeg.",
+  "author": "anouk@oldenburg.me",
+  "startup": "if [[ ! -z \"{{PY_PACKAGES}}\" ]]; then pip install -U --prefix .local {{PY_PACKAGES}}; fi; if [[ -f /home/container/${REQUIREMENTS_FILE} ]]; then pip install -U --prefix .local -r ${REQUIREMENTS_FILE}; fi; echo \"username=${SMB_USERNAME}\" > credentials; echo \"password=${SMB_PASSWORD}\" >> credentials; /usr/local/bin/python /home/container/{{PY_FILE}}",
+  "features": null,
+  "docker_images": {
+    "Python 3.13": "ghcr.io/ptero-eggs/yolks:python_3.13",
+    "Python 3.12": "ghcr.io/ptero-eggs/yolks:python_3.12",
+    "Python 3.11": "ghcr.io/ptero-eggs/yolks:python_3.11",
+    "Python 3.10": "ghcr.io/ptero-eggs/yolks:python_3.10"
+  },
+  "config": {
+    "files": "{}",
+    "startup": "{\r\n    \"done\": \"change this part\"\r\n}",
+    "logs": "{}",
+    "stop": "^C"
+  },
+  "environment": [],
+  "scripts": {
+    "installation": {
+      "script": "#!/bin/bash\r\napt update\r\napt-get install -y ffmpeg python3 python3-pip cifs-utils wget\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\npip install -U --prefix .local discord.py\r\npip install -U --prefix .local aiohttp\r\n\r\nwget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp\r\nchmod +x yt-dlp\r\n\r\ntouch logs.log\r\ntouch credentials\r\necho \"username=${SMB_USERNAME}\" >> credentials\r\necho \"password=${SMB_PASSWORD}\" >> credentials\r\n\r\nmkdir -p media/\r\n\r\necho \"Installing python requirements into folder\"\r\nif [[ ! -z ${PY_PACKAGES} ]]; then\r\n    pip install -U --prefix .local ${PY_PACKAGES}\r\nfi\r\n\r\nif [ -f /mnt/server/requirements.txt ]; then\r\n    pip install -U --prefix .local -r ${REQUIREMENTS_FILE}\r\nfi\r\n\r\necho -e \"install complete\"\r\nexit 0",
+      "container": "python:3.8-slim-bookworm",
+      "entrypoint": "bash"
+    }
+  },
+  "variables": [
+    {
+      "name": "User Uploaded Files",
+      "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+      "env_variable": "USER_UPLOAD",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Auto Update",
+      "description": "Pull the latest files on startup when using a GitHub repo.",
+      "env_variable": "AUTO_UPDATE",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "App py file",
+      "description": "The file that starts the App.",
+      "env_variable": "PY_FILE",
+      "default_value": "app.py",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Additional Python packages",
+      "description": "Install additional python packages.\r\n\r\nUse spaces to separate",
+      "env_variable": "PY_PACKAGES",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
+      "field_type": "text"
+    },
+    {
+      "name": "SMB Share - Username",
+      "description": "The username for the SMB share.",
+      "env_variable": "SMB_USERNAME",
+      "default_value": "user",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "SMB Share - Password",
+      "description": "The password for the SMB share.",
+      "env_variable": "SMB_PASSWORD",
+      "default_value": "password",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "SMB Share - Host",
+      "description": "The host for the SMB share.",
+      "env_variable": "SMB_HOST",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
+      "field_type": "text"
+    },
+    {
+      "name": "SMB Share - Location",
+      "description": "The location for the SMB share.",
+      "env_variable": "SMB_LOCATION",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Discord Bot Token",
+      "description": "The token for the Discord bot.",
+      "env_variable": "DISCORD_BOT_TOKEN",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Requirements file",
+      "description": "if there are other requirements files to choose from.",
+      "env_variable": "REQUIREMENTS_FILE",
+      "default_value": "requirements.txt",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    }
+  ]
+}
