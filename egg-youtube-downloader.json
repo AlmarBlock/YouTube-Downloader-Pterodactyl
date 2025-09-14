@@ -6,7 +6,7 @@
   },
   "exported_at": "2025-09-14T01:20:04+02:00",
   "name": "YouTube Downloader",
-  "author": "anouk@oldenburg.me",
+  "author": "mail@example.com",
   "description": "Installiert einen Discord YouTube Downloader Bot mit yt-dlp und ffmpeg.",
   "features": null,
   "docker_images": {
