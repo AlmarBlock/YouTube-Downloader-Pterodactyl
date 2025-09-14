@@ -62,46 +62,6 @@
       "field_type": "text"
     },
     {
-      "name": "SMB Share - Username",
-      "description": "The username for the SMB share.",
-      "env_variable": "SMB_USERNAME",
-      "default_value": "user",
-      "user_viewable": true,
-      "user_editable": true,
-      "rules": "required|string",
-      "field_type": "text"
-    },
-    {
-      "name": "SMB Share - Password",
-      "description": "The password for the SMB share.",
-      "env_variable": "SMB_PASSWORD",
-      "default_value": "password",
-      "user_viewable": true,
-      "user_editable": true,
-      "rules": "required|string",
-      "field_type": "text"
-    },
-    {
-      "name": "SMB Share - Host",
-      "description": "The host for the SMB share.",
-      "env_variable": "SMB_HOST",
-      "default_value": "",
-      "user_viewable": true,
-      "user_editable": true,
-      "rules": "nullable|string",
-      "field_type": "text"
-    },
-    {
-      "name": "SMB Share - Location",
-      "description": "The location for the SMB share.",
-      "env_variable": "SMB_LOCATION",
-      "default_value": "",
-      "user_viewable": true,
-      "user_editable": true,
-      "rules": "nullable|string",
-      "field_type": "text"
-    },
-    {
       "name": "Discord Bot Token",
       "description": "The token for the Discord bot.",
       "env_variable": "DISCORD_BOT_TOKEN",

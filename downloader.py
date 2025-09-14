@@ -1,11 +1,8 @@
 import subprocess
-import asyncio
 import logging
 import sys
-import os
 
-SMB_HOST = os.environ.get('SMB_HOST')
-SMB_LOCATION = os.environ.get('SMB_LOCATION')
+temp_folder = "/mount_temp/"
 
 def log(message):
     with open('logs.log', 'a') as file:
@@ -29,9 +26,9 @@ def thumbnail_transcoding(file_title, thumbnail_file_type):
 
     #Converting thumbnail
     log("\nConverting thumbnail")
-    command = ["ffmpeg", "-i", thumbnail_file, thumbnail_file_out]
+    command = ["ffmpeg", "-i", temp_folder+thumbnail_file, temp_folder+thumbnail_file_out]
     result = subprocess.run(command, capture_output=True, text=True)
-    command = ["rm", thumbnail_file]
+    command = ["rm", temp_folder+thumbnail_file]
     result = subprocess.run(command, capture_output=False, text=True)
     log("\nThumbnail converted")
 
@@ -43,9 +40,9 @@ def video_transcoding(file_title, video_file_type):
 
     #Converting video
     log("\nConverting video")
-    command = ["ffmpeg", "-i", video_file, video_file_out]
+    command = ["ffmpeg", "-i", temp_folder+video_file, temp_folder+video_file_out]
     result = subprocess.run(command, capture_output=True, text=True)
-    command = ["rm", video_file]
+    command = ["rm", temp_folder+video_file]
     result = subprocess.run(command, capture_output=False, text=True)
     log("\nVideo converted")
 
@@ -54,17 +51,17 @@ def video_transcoding(file_title, video_file_type):
 def downloader_video(url, downloader, transcode):
     log("\nDownloading video (url: " + url + ")")
     #check file bofore
-    command = ["ls"]
+    command = ["ls", temp_folder]
     result = subprocess.run(command, capture_output=True, text=True)
     files_befor = result.stdout
 
     #download video
-    command = ["./yt-dlp", "--downloader", downloader, "--write-thumbnail", url] #NOTE - output to mount/ (in whole script)
+    command = ["./yt-dlp", "-o", temp_folder+"%(title)s.%(ext)s", "--downloader", downloader, "--write-thumbnail", url]
     result = subprocess.run(command, capture_output=True, text=True)
     log(result.stdout)
 
     #check file after
-    command = ["ls"]
+    command = ["ls", temp_folder]
     result = subprocess.run(command, capture_output=True, text=True)
     files_after = result.stdout
 
@@ -102,7 +99,6 @@ def downloader_video(url, downloader, transcode):
 
     log("Video title: " + video_title)
     log("File title: " + file_title)
-
     if not video_file_type in ["mkv", "mp4", "webm"] or transcode and not video_file_type in ["mp4"]:
         video_file_out = video_transcoding(file_title, video_file_type)
     else:
@@ -111,25 +107,20 @@ def downloader_video(url, downloader, transcode):
         thumbnail_file_out = thumbnail_transcoding(file_title, thumbnail_file_type)
     else:
         thumbnail_file_out = file_title + "." + thumbnail_file_type
-
     #Rename video and thumbnail
     log("\nRenaming video and thumbnail")
-    command = ["mv", video_file_out, video_title + ".mp4"]
+    command = ["mv", temp_folder+video_file_out, temp_folder+video_title + ".mp4"]
     result = subprocess.run(command, capture_output=False, text=True)
-    command = ["mv", thumbnail_file_out, video_title + ".jpg"]
+    command = ["mv", temp_folder+thumbnail_file_out, temp_folder+video_title + ".jpg"]
     result = subprocess.run(command, capture_output=False, text=True)
 
     #upload video and thumbnail
     log("\nUploading video and thumbnail")
-    command = ["sudo", "mount", "-t", "cifs", "-o", "credentials=credentials", f"//{SMB_HOST}{SMB_LOCATION}", "/media/"]
+    command = ["mkdir", "/mount/" + video_title]
     result = subprocess.run(command, capture_output=False, text=True)
-    command = ["sudo", "mkdir", "/media/" + video_title]
+    command = ["mv", temp_folder+video_title + ".jpg", "/mount/" + video_title + "/folder.jpg"]
     result = subprocess.run(command, capture_output=False, text=True)
-    command = ["sudo", "mv", video_title + ".jpg", "/media/" + video_title + "/folder.jpg"]
-    result = subprocess.run(command, capture_output=False, text=True)
-    command = ["sudo", "mv", video_title + ".mp4", "/media/" + video_title + "/" + video_title + ".mp4"]
-    result = subprocess.run(command, capture_output=False, text=True)
-    command = ["sudo", "umount", "-t", "cifs", "/media/"]
+    command = ["mv", temp_folder+video_title + ".mp4", "/mount/" + video_title + "/" + video_title + ".mp4"]
     result = subprocess.run(command, capture_output=False, text=True)
         
     log("\nDone")

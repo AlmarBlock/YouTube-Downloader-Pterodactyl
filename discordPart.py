@@ -235,8 +235,3 @@ async def handle_download(channel, url: str, downloader: str, transcode: bool, p
 
 if __name__ == "__main__":
     run()
-
-#if __name__ == "__main__":
-#    url = "https://www.youtube.com/watch?v=Abg1moXGLFU"
-#    downloader = "ffmpeg"
-#    download_video(url, downloader)
