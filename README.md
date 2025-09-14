@@ -14,7 +14,7 @@ A small YouTube Downloader that runs on Pterodactyl and uploads the content to a
 
 3. Run the following command on your Wings host machine and follow the steps:
     ```bash
-    bash <(curl -s https://raw.githubusercontent.com/AlmarBlock/    YouTube-Downloader-Pterodactyl/refs/heads/main/install_mount.sh)
+    bash <(curl -s https://raw.githubusercontent.com/AlmarBlock/YouTube-Downloader-Pterodactyl/refs/heads/main/install_mount.sh)
     ```
     *Note: On some systems, you must already be logged in as root before executing the one-line command (adding sudo in front of the command does not work).*
 
