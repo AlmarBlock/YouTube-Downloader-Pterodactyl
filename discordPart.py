@@ -40,7 +40,16 @@ def log(message):
     print(message)
 
 def get_usable_url(url):
-    return "https://www.youtube.com/watch?v=" +  url.split("be/")[1].split("?si")[0]
+    """
+    Extrahiert die YouTube Video-ID aus verschiedenen bekannten URL-Formaten und
+    gibt einen 'https://www.youtube.com/watch?v=VIDEOID' Link zurück.
+    Kompatibel mit Kurz- und Standard-URLs, ignoriert zusätzliche Parameter.
+    """
+    match = re.search(r"(?:youtu\.be/|v=)([A-Za-z0-9_-]{11})", url)
+    if match:
+        video_id = match.group(1)
+        return "https://www.youtube.com/watch?v=" + video_id
+    return url  # Kein gültiger YouTube-Link gefunden
 
 def queue_to_string(queue, highlight=False):
     string = ""
@@ -60,6 +69,8 @@ def queue_to_string(queue, highlight=False):
     return string
 
 def get_video_title(Video_URL):
+    if not "youtu" in Video_URL:
+        return "Kein YouTube Link"
     if "&t=" in Video_URL:
         Video_URL = Video_URL.split("&t")[0]
     if "shorts" not in Video_URL:
@@ -105,7 +116,7 @@ def run():
         log("Done! ✅")
 
     @tree.command()
-    async def download_video(interaction: Interaction, url: str, downloader: str = "ffmpeg", transcode: bool = False, ping: bool = False):
+    async def download_video(interaction: Interaction, url: str, downloader: str = "ffmpeg", transcode: bool = False, ping: bool = False, playlist: str = None, staffel: int = None):
         """Download a video from YouTube"""
         global downloading
         global start_time
@@ -117,13 +128,20 @@ def run():
         if downloader not in ["ffmpeg", "yt-dlp"]:
             await interaction.followup.send(content="**Bitte wähle einen gültigen Downloader aus.** \n\n `ffmpeg` oder `yt-dlp`")
             return
+        
+        if playlist and not staffel:
+            await interaction.followup.send(content="**Bitte gebe eine Staffel an.**")
+            return
+        
+        if staffel and not playlist:
+            await interaction.followup.send(content="**Bitte gebe einen Playlist Namen an.**")
+            return
 				
-        if "youtu.be" in url:
-            log("URL rewrite")
-            url = get_usable_url(url)
+        log("URL rewrite")
+        url = get_usable_url(url)
 						
         if downloading:
-            queue.append((interaction.channel, url, downloader, transcode, ping, interaction.user.id))
+            queue.append((interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id))
             embed = discord.Embed(
                 title="Ein Download ist bereits im Gange.",
                 description=f'Der Download von: **"{get_video_title(url)} ({url})"** ist an position: **{str(len(queue))}**\n\n{queue_to_string(queue)}',
@@ -153,7 +171,7 @@ def run():
         await interaction.followup.send(embed=embed)
         
         # Download im Hintergrund starten
-        asyncio.create_task(handle_download(interaction.channel, url, downloader, transcode, ping, interaction.user.id))
+        asyncio.create_task(handle_download(interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id))
 
     @tree.command()
     async def queue(interaction: Interaction):
@@ -171,7 +189,7 @@ def run():
             await interaction.response.send_message(embed=embed, ephemeral=False)
             return
         else:
-            channel, url, downloader, transcode, ping, user_id = queue.pop(0)
+            channel, url, downloader, transcode, ping, playlist, staffel, user_id = queue.pop(0)
             embed = discord.Embed(
                 title="❌ Video entfernt ❌",
                 description=f'Der Download von: **"{get_video_title(url)} ({url})"** wurde abgebrochen! \n\n{queue_to_string(queue)}',
@@ -189,46 +207,80 @@ def run():
 
     client.run(token)
 
-
 import concurrent.futures
 
 # Ändere die handle_download Funktion, um den Download in einem separaten Thread auszuführen
-async def handle_download(channel, url: str, downloader: str, transcode: bool, ping: bool, user_id: int):
+async def handle_download(channel, url: str, downloader: str, transcode: bool, ping: bool, playlist: str, staffel: int, user_id: int):
     global start_time
     global end_time
     loop = asyncio.get_running_loop()
     with concurrent.futures.ThreadPoolExecutor() as pool:
-        await loop.run_in_executor(pool, downloader_video, url, downloader, transcode)
-    log("Done")
-    end_time = time.time()
-    run_time = end_time - start_time
-    run_hours = int(run_time // 3600)
-    run_minutes = int((run_time % 3600) // 60)
-    run_seconds = int(run_time % 60)
-    log("Time: " + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds))
-    if ping:
-        try:
-            embed = discord.Embed(title="✅ " + get_video_title(url) + " ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n|| <@" + str(user_id) + "> ||", color=0x00ff00)
-        except:
-            embed = discord.Embed(title="✅ Done ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n|| <@" + str(user_id) + "> ||", color=0x00ff00)
+        result = await loop.run_in_executor(
+            pool,
+            downloader_video,
+            url,
+            downloader,
+            transcode,
+            playlist,
+            staffel
+        )
+
+    # Das Tupel auspacken
+    code, error_message = result
+
+    # if exit code == 0: Error
+    # if exit code == 1: Done
+    if code == 1:
+        log("Done")
+        end_time = time.time()
+        run_time = end_time - start_time
+        run_hours = int(run_time // 3600)
+        run_minutes = int((run_time % 3600) // 60)
+        run_seconds = int(run_time % 60)
+        log("Time: " + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds))
+        if ping:
+            try:
+                embed = discord.Embed(title="✅ " + get_video_title(url) + " ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n|| <@" + str(user_id) + "> ||", color=0x00ff00)
+            except:
+                embed = discord.Embed(title="✅ Done ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n|| <@" + str(user_id) + "> ||", color=0x00ff00)
+        else:
+            try:
+                embed = discord.Embed(title="✅ " + get_video_title(url) + " ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`", color=0x00ff00)
+            except:
+                embed = discord.Embed(title="✅ Done ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`", color=0x00ff00)
+        #try:
+        await channel.send(embed=embed)
     else:
-        try:
-            embed = discord.Embed(title="✅ " + get_video_title(url) + " ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`", color=0x00ff00)
-        except:
-            embed = discord.Embed(title="✅ Done ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`", color=0x00ff00)
-    #try:
-    await channel.send(embed=embed)
+        log("Download Failed")
+        end_time = time.time()
+        run_time = end_time - start_time
+        run_hours = int(run_time // 3600)
+        run_minutes = int((run_time % 3600) // 60)
+        run_seconds = int(run_time % 60)
+        log("Time: " + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds))
+        if ping:
+            try:
+                embed = discord.Embed(title="⛔ " + get_video_title(url) + " ⛔", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n" + error_message + "\n|| <@" + str(user_id) + "> ||", color=0xff0000)
+            except:
+                embed = discord.Embed(title="⛔ Failed ⛔", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n" + error_message + "\n|| <@" + str(user_id) + "> ||", color=0xff0000)
+        else:
+            try:
+                embed = discord.Embed(title="⛔ " + get_video_title(url) + " ⛔", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n" + error_message, color=0xff0000)
+            except:
+                embed = discord.Embed(title="⛔ Done ⛔", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n" + error_message, color=0xff0000)
+        #try:
+        await channel.send(embed=embed)
     #except:
         #log("Could not send message")
     if len(queue) > 0:
-        channel, url, downloader, transcode, ping, user_id = queue.pop(0)
+        channel, url, downloader, transcode, ping, playlist, staffel, user_id = queue.pop(0)
         log("Downloading video")
         try:
             embed = discord.Embed(title=get_video_title(url), description="Der Download von: " + get_video_title(url) + ' (' + url + ') hat begonnen.', color=0x00ff00)
         except:
             embed = discord.Embed(title="Download", description="Der Download hat begonnen. \n\n-# Der Title konnte nicht geladen werden.", color=0x00ff00)
         await channel.send(embed=embed)
-        asyncio.create_task(handle_download(channel, url, downloader, transcode, ping, user_id))
+        asyncio.create_task(handle_download(channel, url, downloader, transcode, ping, playlist, staffel, user_id))
     else:
         global downloading
         downloading = False
