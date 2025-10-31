@@ -18,15 +18,19 @@ A small YouTube Downloader that runs on Pterodactyl and uploads the content to a
     ```
     *Note: On some systems, you must already be logged in as root before executing the one-line command (adding sudo in front of the command does not work).*
 
-4. Create two new mounts in the Pterodactyl web panel:
+4. Create three new mounts in the Pterodactyl web panel:
 
     1. 
-        - The source must be set to the local mount path entered in step one.
+        - The source must be set to the local mount path where you want to save the downloaded videos. It should be a subfolder of the local path you entered in step three.
         - The target must be set to `/mount`
         <hr>
     2. 
-        - The source must be set to the path of the temp folder that you entered in the first step.
+        - The source must be set to the path of the temp folder that you entered in the third step.
         - The target must be set to `/mount_temp`
+        <hr>
+    3. 
+        - The source must be set to the local mount path where you want to save the downloaded playlists or shows. It should be a subfolder of the local path you entered in step three.
+        - The target must be set to `/mount_playlist`
 
     *Note: Make sure that both Nodes and Eggs are set to the correct ones (Egg must be set to "YouTube Downloader").*
 

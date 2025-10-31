@@ -39,6 +39,19 @@ def log(message):
         file.close()
     print(message)
 
+def check_for_valid_folders():
+    folders_missing = []
+    if not os.path.isdir("/mount"):
+        folders_missing.append("/mount")
+    if not os.path.isdir("/mount_temp"):
+        folders_missing.append("/mount_temp")
+    if not os.path.isdir("/mount_playlist"):
+        folders_missing.append("/mount_playlist")
+    if folders_missing:
+        log("Missing folders: " + ", ".join(folders_missing))
+        log("Ensure the folders are correctly configured in the Pterodactyl mounts.")
+        exit(0)
+
 def get_usable_url(url):
     """
     Extrahiert die YouTube Video-ID aus verschiedenen bekannten URL-Formaten und
@@ -286,4 +299,5 @@ async def handle_download(channel, url: str, downloader: str, transcode: bool, p
         downloading = False
 
 if __name__ == "__main__":
+    check_for_valid_folders()
     run()

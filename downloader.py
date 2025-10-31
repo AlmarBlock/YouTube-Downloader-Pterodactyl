@@ -165,6 +165,12 @@ def downloader_video(url, downloader, transcode, playlist, staffel):
         log("\nUploading video and thumbnail")
         command = ["mkdir", "-p", "/mount_playlist/" + playlist]
         result = subprocess.run(command, capture_output=False, text=True)
-        command = ["mv", temp_folder + playlist + "/Staffel " + str(staffel), "/mount_playlist/" + playlist]
-        result = subprocess.run(command, capture_output=False, shell=True, text=True)
+        input_path = str(temp_folder + playlist + "/Staffel " + str(staffel))
+        output_path = str("/mount_playlist/" + playlist + "/")
+        log("input_path: " + input_path)
+        log("output_path: " + output_path)
+        command = ["mv", input_path, output_path]
+        result = subprocess.run(command, capture_output=False, text=True)
+        command = ["rm", "-r", str(temp_folder + playlist)]
+        result = subprocess.run(command, capture_output=False, text=True)
     return 1, None
