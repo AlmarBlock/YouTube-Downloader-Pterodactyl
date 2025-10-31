@@ -36,7 +36,7 @@ A small YouTube Downloader that runs on Pterodactyl and uploads the content to a
 
 5. Create a new server using the egg. Make sure to set the `Discord Bot Token` variable to your token.
 
-6. After the installation script has finished installing the server, go back to the web panel and add both mounts to the server.
+6. After the installation script has finished installing the server, go back to the web panel and add all three mounts to the server.
 
 7. Start the server.
 
