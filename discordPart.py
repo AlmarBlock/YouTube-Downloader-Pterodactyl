@@ -69,21 +69,26 @@ def queue_to_string(queue, highlight=False):
     for i in range(len(queue)):
         if queue[i][1] == queue[-1][1] and not highlight:
             try:
-                string = string + "\n**" + str(i+1) + ". [" + get_video_title(queue[i][1]) + "](" + queue[i][1] + ")**"
+                string = string + "\n**" + str(i+1) + ". [" + get_video_title([queue[i][1], queue[i][5], queue[i][6]]) + "](" + queue[i][1] + ")**"
             except:
                 string = string + "\n**" + str(i+1) + ". [" + queue[i][1] + "](" + queue[i][1] + ")**"
         else:
             try:
-                string = string + "\n" + str(i+1) + ". [" + get_video_title(queue[i][1]) + "](" + queue[i][1] + ")"
+                string = string + "\n" + str(i+1) + ". [" + get_video_title([queue[i][1], queue[i][5], queue[i][6]]) + "](" + queue[i][1] + ")"
             except:
                 string = string + "\n" + str(i+1) + ". [" + queue[i][1] + "](" + queue[i][1] + ")"
     if string == "":
         return "Die Warteschlange ist leer."
     return string
 
-def get_video_title(Video_URL):
+def get_video_title(queue_item):
+    Video_URL = queue_item[0]
+    Playlist = queue_item[1]
+    Staffel = queue_item[2]
+    if Playlist:
+        return str(Playlist + " - Staffel " + str(Staffel))
     if not "youtu" in Video_URL:
-        return "Kein YouTube Link"
+        return "Titel konnte nicht geladen werden"
     if "&t=" in Video_URL:
         Video_URL = Video_URL.split("&t")[0]
     if "shorts" not in Video_URL:
@@ -157,7 +162,7 @@ def run():
             queue.append((interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id))
             embed = discord.Embed(
                 title="Ein Download ist bereits im Gange.",
-                description=f'Der Download von: **"{get_video_title(url)} ({url})"** ist an position: **{str(len(queue))}**\n\n{queue_to_string(queue)}',
+                description=f'Der Download von: **"{get_video_title([url, playlist, staffel])} ({url})"** ist an position: **{str(len(queue))}**\n\n{queue_to_string(queue)}',
                 color=0xFFCF11
             )
             await interaction.followup.send(embed=embed)
@@ -168,7 +173,7 @@ def run():
         
         log("Downloading video")
         try:
-            video_title = get_video_title(url)
+            video_title = get_video_title([url, playlist, staffel])
             embed = discord.Embed(
                 title=video_title,
                 description=f"Der Download von: {video_title} ({url}) hat begonnen.",
@@ -205,7 +210,7 @@ def run():
             channel, url, downloader, transcode, ping, playlist, staffel, user_id = queue.pop(0)
             embed = discord.Embed(
                 title="❌ Video entfernt ❌",
-                description=f'Der Download von: **"{get_video_title(url)} ({url})"** wurde abgebrochen! \n\n{queue_to_string(queue)}',
+                description=f'Der Download von: **"{get_video_title([url, playlist, staffel])} ({url})"** wurde abgebrochen! \n\n{queue_to_string(queue)}',
                 color=0xff0000
             )
             await interaction.response.send_message(embed=embed, ephemeral=False)
@@ -253,12 +258,12 @@ async def handle_download(channel, url: str, downloader: str, transcode: bool, p
         log("Time: " + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds))
         if ping:
             try:
-                embed = discord.Embed(title="✅ " + get_video_title(url) + " ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n|| <@" + str(user_id) + "> ||", color=0x00ff00)
+                embed = discord.Embed(title="✅ " + get_video_title([url, playlist, staffel]) + " ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n|| <@" + str(user_id) + "> ||", color=0x00ff00)
             except:
                 embed = discord.Embed(title="✅ Done ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n|| <@" + str(user_id) + "> ||", color=0x00ff00)
         else:
             try:
-                embed = discord.Embed(title="✅ " + get_video_title(url) + " ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`", color=0x00ff00)
+                embed = discord.Embed(title="✅ " + get_video_title([url, playlist, staffel]) + " ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`", color=0x00ff00)
             except:
                 embed = discord.Embed(title="✅ Done ✅", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`", color=0x00ff00)
         #try:
@@ -273,12 +278,12 @@ async def handle_download(channel, url: str, downloader: str, transcode: bool, p
         log("Time: " + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds))
         if ping:
             try:
-                embed = discord.Embed(title="⛔ " + get_video_title(url) + " ⛔", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n" + error_message + "\n|| <@" + str(user_id) + "> ||", color=0xff0000)
+                embed = discord.Embed(title="⛔ " + get_video_title([url, playlist, staffel]) + " ⛔", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n" + error_message + "\n|| <@" + str(user_id) + "> ||", color=0xff0000)
             except:
                 embed = discord.Embed(title="⛔ Failed ⛔", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n" + error_message + "\n|| <@" + str(user_id) + "> ||", color=0xff0000)
         else:
             try:
-                embed = discord.Embed(title="⛔ " + get_video_title(url) + " ⛔", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n" + error_message, color=0xff0000)
+                embed = discord.Embed(title="⛔ " + get_video_title([url, playlist, staffel]) + " ⛔", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n" + error_message, color=0xff0000)
             except:
                 embed = discord.Embed(title="⛔ Done ⛔", description="In: `" + str(run_hours) + ":" + str(run_minutes) + ":" + str(run_seconds) + "`\n" + error_message, color=0xff0000)
         #try:
@@ -289,7 +294,7 @@ async def handle_download(channel, url: str, downloader: str, transcode: bool, p
         channel, url, downloader, transcode, ping, playlist, staffel, user_id = queue.pop(0)
         log("Downloading video")
         try:
-            embed = discord.Embed(title=get_video_title(url), description="Der Download von: " + get_video_title(url) + ' (' + url + ') hat begonnen.', color=0x00ff00)
+            embed = discord.Embed(title=get_video_title([url, playlist, staffel]), description="Der Download von: " + get_video_title([url, playlist, staffel]) + ' (' + url + ') hat begonnen.', color=0x00ff00)
         except:
             embed = discord.Embed(title="Download", description="Der Download hat begonnen. \n\n-# Der Title konnte nicht geladen werden.", color=0x00ff00)
         await channel.send(embed=embed)
