@@ -40,5 +40,15 @@ A small YouTube Downloader that runs on Pterodactyl and uploads the content to a
 
 7. Start the server.
 
+## Cookie File
+Some websites require a cookie file to make the site think that you are logged in.  
+This is currently only available for `YouTube.com`.  
+If necessary, follow the yt-dlp documentation to create a `cookies.txt` file: <br>
+https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp
+    
+After creating the file, place it in the top-level directory of your server.  
+Make sure the file name is `cookies.txt`.
+
+
 ## Shoutout
 This project would not be possible without the work of the [yt-dlp](https://github.com/yt-dlp/yt-dlp) project.
