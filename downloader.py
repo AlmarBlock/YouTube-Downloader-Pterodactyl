@@ -1,8 +1,12 @@
 import subprocess
 import logging
 import sys
+import os
+import shutil
 
 temp_folder = "/mount_temp/"
+mount_playlist = "/mount_playlist/"
+mount_videos = "/mount/"
 
 def log(message):
     with open('logs.log', 'a') as file:
@@ -20,157 +24,86 @@ logging.basicConfig(
     ]
 )
 
-def thumbnail_transcoding(file_title, thumbnail_file_type):
-    thumbnail_file = file_title + "." + thumbnail_file_type
-    thumbnail_file_out = file_title + ".jpg"
-
-    #Converting thumbnail
-    log("\nConverting thumbnail")
-    command = ["ffmpeg", "-i", temp_folder+thumbnail_file, temp_folder+thumbnail_file_out]
+def download_using_yt_dlp(url, downloader, save_path, naming_convention):
+    command = ["./yt-dlp", "--downloader", downloader, "-P", save_path, "-o", naming_convention, "--js-runtimes", "deno:/home/container/deno", "--write-thumbnail", "--convert-thumbnails", "png", url]
     result = subprocess.run(command, capture_output=True, text=True)
-    command = ["rm", temp_folder+thumbnail_file]
-    result = subprocess.run(command, capture_output=False, text=True)
-    log("\nThumbnail converted")
-
-    return thumbnail_file_out
-
-def video_transcoding(file_title, video_file_type):
-    video_file = file_title + "." + video_file_type
-    video_file_out = file_title + ".mp4"
-
-    #Converting video
-    log("\nConverting video")
-    command = ["ffmpeg", "-i", temp_folder+video_file, temp_folder+video_file_out]
-    result = subprocess.run(command, capture_output=True, text=True)
-    command = ["rm", temp_folder+video_file]
-    result = subprocess.run(command, capture_output=False, text=True)
-    log("\nVideo converted")
-
-    return video_file_out
+    if "HTTP Error 403" in result.stderr:
+        log("YouTube download failed: HTTP Error 403: Forbidden")
+        return [0, "YouTube download failed: HTTP Error 403: Forbidden"]
+    if "Video unavailable" in result.stderr:
+        log("YouTube download failed: Video unavailable")
+        return [0, "YouTube download failed: Video unavailable"]
+    return [1, result]
+    
 
 def downloader_video(url, downloader, transcode, playlist, staffel):
-    log("\nDownloading video (url: " + url + ")")
-    #check file bofore
-    command = ["ls", temp_folder]
-    result = subprocess.run(command, capture_output=True, text=True)
-    files_befor = result.stdout
-
-    log("Playlist name: " + str(playlist))
-
-    save_path = temp_folder+"%(title)s.%(ext)s"
-    if playlist:
-        save_path = temp_folder + playlist + "/Staffel " + str(staffel)
-        command = ["mkdir", "-p", save_path]
-        result = subprocess.run(command, capture_output=False, text=True)
-        save_path = save_path + "/%(title)s.%(ext)s"
-
-    #download video
-    if not "youtube.com/" in url:
-        log("Save from non YT")
-        command = ["./yt-dlp", "-o", save_path, "--downloader", downloader, "--write-thumbnail", url]
-        result = subprocess.run(command, capture_output=True, text=True)
+    if playlist and staffel:
+        return_val = download_playlist(url, downloader, playlist, staffel)
     else:
-        log("Save from YT")
-        log("Try with --cookies")
-        command = ["./yt-dlp", "--cookies", "cookies.txt", "-o", save_path, "--downloader", downloader, "--write-thumbnail", url]
-        result = subprocess.run(command, capture_output=True, text=True)
-        log("stdout - cookie file: ")
-        log(result.stdout)
-        if result.stdout == "":
-            log("stderr - cookie file: ")
-            log(result.stderr)
-            #if still not working try with passward / username
-            if "HTTP Error 403" in result.stderr:
-                log("Try with credentials")
-                command = ["./yt-dlp", "--netrc", "-o", save_path, "--downloader", downloader, "--write-thumbnail", url]
-                result = subprocess.run(command, capture_output=True, text=True)
-                log("stdout - password/username: ")
-                log(result.stdout)
-                if result.stdout == "":
-                    log("stderr - password/username: ")
-                    log(result.stderr)
-                    if "HTTP Error 403" in result.stderr:
-                        log("YouTube download failed: HTTP Error 403: Forbidden")
-                        return 0,"YouTube download failed: HTTP Error 403: Forbidden"
+        return_val = download_video(url, downloader)
 
-
-    #check file after
-    command = ["ls", temp_folder]
-    result = subprocess.run(command, capture_output=True, text=True)
-    files_after = result.stdout
-
-    if not playlist:
-        #check the differance and get file / video title
-        try:
-            file_differance = []
-            files_befor_list = files_befor.split('\n')
-            files_after_list = files_after.split('\n')
-            for file in files_after_list:
-                if file not in files_befor_list:
-                    file_differance.append(file)
-
-            video_file_type = ""
-            thumbnail_file_type = ""
-            video_pos = 0
-
-            file_ending = file_differance[0].split('.')[-1]
-            if file_ending == "mkv" or file_ending == "mp4" or file_ending == "webm":
-                video_pos = 0
-                video_file_type = file_ending
-            else:
-                thumbnail_file_type = file_ending
-
-            file_ending = file_differance[1].split('.')[-1]
-            if file_ending == "mkv" or file_ending == "mp4" or file_ending == "webm":
-                video_pos = 1
-                video_file_type = file_ending
-            else:
-                thumbnail_file_type = file_ending
-        except Exception as e:
-            error_message = f"{type(e).__name__}: {str(e)}"
-            log("File finding failed –\n" + error_message)
-            return 0, "File finding failed –\n" + error_message
-        file_title = file_differance[video_pos][:-len(video_file_type)-1]
-        video_title = file_differance[video_pos][:-len(video_file_type)-15]
-
-        log("Video title: " + video_title)
-        log("File title: " + file_title)
-        if not video_file_type in ["mkv", "mp4", "webm"] or transcode and not video_file_type in ["mp4"]:
-            video_file_out = video_transcoding(file_title, video_file_type)
-        else:
-            video_file_out = file_title + "." + video_file_type
-        if not thumbnail_file_type in ["jpg"]:
-            thumbnail_file_out = thumbnail_transcoding(file_title, thumbnail_file_type)
-        else:
-            thumbnail_file_out = file_title + "." + thumbnail_file_type
-        #Rename video and thumbnail
-        log("\nRenaming video and thumbnail")
-        command = ["mv", temp_folder+video_file_out, temp_folder+video_title + ".mp4"]
-        result = subprocess.run(command, capture_output=False, text=True)
-        command = ["mv", temp_folder+thumbnail_file_out, temp_folder+video_title + ".jpg"]
-        result = subprocess.run(command, capture_output=False, text=True)
-
-        #upload video and thumbnail
-        log("\nUploading video and thumbnail")
-        command = ["mkdir", "-p", "/mount/" + video_title]
-        result = subprocess.run(command, capture_output=False, text=True)
-        command = ["mv", temp_folder+video_title + ".jpg", "/mount/" + video_title + "/folder.jpg"]
-        result = subprocess.run(command, capture_output=False, text=True)
-        command = ["mv", temp_folder+video_title + ".mp4", "/mount/" + video_title + "/" + video_title + ".mp4"]
-        result = subprocess.run(command, capture_output=False, text=True)
-
-        log("\nDone")
-    else:
-        #upload video and thumbnail
-        log("\nUploading video and thumbnail")
-        command = ["mkdir", "-p", "/mount_playlist/" + playlist]
-        result = subprocess.run(command, capture_output=False, text=True)
-        input_path = str(temp_folder + playlist + "/Staffel " + str(staffel))
-        output_path = str("/mount_playlist/" + playlist + "/")
-        log("input_path: " + input_path)
-        log("output_path: " + output_path)
-        command = ["mv", input_path, output_path]
-        result = subprocess.run(command, capture_output=False, text=True)
-        command = ["rm", "-r", str(temp_folder + playlist)]
-        result = subprocess.run(command, capture_output=False, text=True)
+    if return_val[0] == 0:
+        return 0, return_val[1]
+    
+    try:
+        if transcode:
+            log("\nTranscoding enabled, but transcoding functionality is not implemented in this version.")
+        upload_video(playlist)
+    except Exception as e:
+        log("\nDownload Logs (stdout): " + return_val[1].stdout)
+        log("\nDownload Logs (stderr): " + return_val[1].stderr)
+        log("\nError during upload: " + str(e))
+        return 0, "Error during upload: " + str(e)
     return 1, None
+
+def download_video(url, downloader):
+    save_path = temp_folder
+    naming_convention = "%(title)s.%(ext)s"
+    log("\nDownloading video (url: " + url + ")")
+    return download_using_yt_dlp(url, downloader, save_path, naming_convention)
+
+def download_playlist(url, downloader, playlist, staffel):
+    save_path = temp_folder + playlist + "/Staffel " + str(staffel)
+    command = ["mkdir", "-p", save_path]
+    subprocess.run(command, capture_output=False, text=True)
+    naming_convention = "%(playlist_index)02d - %(title)s.%(ext)s"
+    log("\nDownloading playlist (url: " + url + ")")
+    log("Playlist name: " + str(playlist))
+    return download_using_yt_dlp(url, downloader, save_path, naming_convention)
+
+def upload_video(playlist):
+    log("\nUploading video and thumbnail")
+    if playlist:
+        upload_location = mount_playlist + playlist + "/"
+        local_location = temp_folder + playlist + "/"
+        log("Local location: " + local_location)
+        log("Upload location: " + upload_location)
+        os.makedirs(upload_location, exist_ok=True)
+        for item in os.listdir(local_location):
+            src = os.path.join(local_location, item)
+            dest = os.path.join(upload_location, item)
+            shutil.move(src, dest)
+            log(f"✓ Verschoben: {item}")
+    else:
+        filename = os.listdir(temp_folder)[0]
+        name = os.path.splitext(filename)[0]
+        log("Video name: " + name)
+        upload_location = f"{mount_videos}{name}/"
+        local_location = temp_folder
+        log("Local location: " + local_location)
+        log("Upload location: " + upload_location)
+        os.makedirs(upload_location, exist_ok=True)
+        for item in os.listdir(local_location):
+            src = os.path.join(local_location, item)
+            dest = os.path.join(upload_location, item)
+            shutil.move(src, dest)
+            log(f"✓ Verschoben: {item}")
+
+    for item in os.listdir(temp_folder):
+        item_path = os.path.join(temp_folder, item)
+        if os.path.isfile(item_path):
+            os.remove(item_path)
+        elif os.path.isdir(item_path):
+            shutil.rmtree(item_path)
+
+    log("\nUpload Done")
