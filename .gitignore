@@ -3,3 +3,8 @@ mount/
 mount_temp/
 mount_playlist/
 yt-dlp
+.cache/
+.git/
+.local/
+__pycache__/
+deno
