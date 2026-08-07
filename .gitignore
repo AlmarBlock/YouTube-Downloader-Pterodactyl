@@ -10,3 +10,4 @@ __pycache__/*
 deno
 __pycache__/downloader.cpython-313.pyc
 logs.log
+git
