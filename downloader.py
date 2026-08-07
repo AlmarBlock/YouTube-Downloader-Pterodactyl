@@ -7,9 +7,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-temp_folder = "/mount_temp/"
-mount_playlist = "/mount_playlist/"
-mount_videos = "/mount/"
+if os.environ.get('DEV_ENV') == 'True':
+    temp_folder = "./mount_temp/"
+    mount_playlist = "./mount_playlist/"
+    mount_videos = "./mount/"
+else:
+    temp_folder = "/mount_temp/"
+    mount_playlist = "/mount_playlist/"
+    mount_videos = "/mount/"
 
 def log(message, level="INFO"):
     if level in ["INFO", "WARNING", "ERROR"]:

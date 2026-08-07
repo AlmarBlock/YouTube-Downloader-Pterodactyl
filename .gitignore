@@ -6,5 +6,6 @@ yt-dlp
 .cache/
 .git/
 .local/
-__pycache__/
+__pycache__/*
 deno
+__pycache__/downloader.cpython-313.pyc

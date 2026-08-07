@@ -74,6 +74,19 @@
       "sort": 6
     },
     {
+      "name": "Dev Mode",
+      "description": "Enable dev mode.",
+      "env_variable": "DEV_ENV",
+      "default_value": "0",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": [
+        "required",
+        "boolean"
+      ],
+      "sort": 7
+    },
+    {
       "name": "Discord Bot Token",
       "description": "The token for the Discord bot.",
       "env_variable": "DISCORD_BOT_TOKEN",
