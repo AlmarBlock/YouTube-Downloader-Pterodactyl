@@ -1,45 +1,51 @@
 {
-  "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+  "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
   "meta": {
-    "version": "PTDL_v2",
-    "update_url": "https:\/\/raw.githubusercontent.com\/AlmarBlock\/YouTube-Downloader-Pterodactyl\/refs\/heads\/main\/egg-youtube-downloader.json"
+    "version": "PLCN_v3",
+    "update_url": "https://raw.githubusercontent.com/AlmarBlock/YouTube-Downloader-Pterodactyl/refs/heads/main/egg-youtube-downloader.json"
   },
-  "exported_at": "2025-12-22T01:51:13+01:00",
+  "exported_at": "2026-08-07T22:13:30+00:00",
   "name": "YouTube Downloader",
-  "author": "mail@example.com",
+  "author": "almarblock@gmail.com",
+  "uuid": "cb9e0eb1-3b04-4cd7-8f85-9ddf283284a0",
   "description": "Installiert einen Discord YouTube Downloader Bot mit yt-dlp und ffmpeg.",
-  "features": null,
+  "icon": "data:image/png;base64,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",
+  "tags": [],
+  "features": [],
   "docker_images": {
-    "Python 3.13": "ghcr.io\/ptero-eggs\/yolks:python_3.13",
-    "Python 3.12": "ghcr.io\/ptero-eggs\/yolks:python_3.12",
-    "Python 3.11": "ghcr.io\/ptero-eggs\/yolks:python_3.11",
-    "Python 3.10": "ghcr.io\/ptero-eggs\/yolks:python_3.10"
+    "Python 3.13": "ghcr.io/ptero-eggs/yolks:python_3.13",
+    "Python 3.12": "ghcr.io/ptero-eggs/yolks:python_3.12"
   },
   "file_denylist": [],
-  "startup": "if [[ -d .git ]] && [[ \"{{AUTO_UPDATE}}\" == \"1\" ]]; then git pull; fi; if [[ -f \/home\/container\/{{REQUIREMENTS_FILE}} ]]; then python3 -m pip install --upgrade pip; python3 -m pip install --upgrade --prefix .local -r \/home\/container\/{{REQUIREMENTS_FILE}};chmod +x .\/deno; chmod +x .\/yt-dlp; .\/yt-dlp -U; fi; exec \/usr\/local\/bin\/python \/home\/container\/{{PY_FILE}}",
+  "startup_commands": {
+    "Default": "if [[ -d .git ]] && [[ \"{{AUTO_UPDATE}}\" == \"1\" ]]; then git reset --hard origin/master; git pull origin master; fi; if [[ -f /home/container/{{REQUIREMENTS_FILE}} ]]; then python3 -m pip install --upgrade pip; python3 -m pip install --upgrade --prefix .local -r /home/container/{{REQUIREMENTS_FILE}};chmod +x ./deno; chmod +x ./yt-dlp; ./yt-dlp -U; fi; exec /usr/local/bin/python /home/container/{{PY_FILE}}"
+  },
   "config": {
     "files": "{}",
-    "startup": "{\r\n    \"done\": \"Done\"\r\n}",
+    "startup": "{\n    \"done\": \"Done\"\n}",
     "logs": "{}",
     "stop": "^C"
   },
   "scripts": {
     "installation": {
-      "script": "#!\/bin\/bash\r\napt update\r\napt-get install -y ffmpeg python3 python3-pip wget git unzip\r\necho \"Clearing Home-Folder\"\r\nrm -rf \/home\/container\/\r\nrm -rf \/mnt\/server\r\nls -A\r\n\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\necho \"Download from GitHub\"\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n  GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\n## pull git python repo\r\nif [ \"$(ls -A \/mnt\/server)\" ]; then\r\n  echo -e \"\/mnt\/server directory is not empty.\"\r\n  if [ -d .git ]; then\r\n    echo -e \".git directory exists\"\r\n    if [ -f .git\/config ]; then\r\n      echo -e \"loading info from git config\"\r\n      ORIGIN=$(git config --get remote.origin.url)\r\n    else\r\n      echo -e \"files found with no git config\"\r\n      echo -e \"closing out without touching things to not break anything\"\r\n      exit 10\r\n    fi\r\n  fi\r\n\r\n  if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n    echo \"pulling latest from github\"\r\n    git pull\r\n  fi\r\nelse\r\n  echo -e \"\/mnt\/server is empty.\\ncloning files into repo\"\r\n  echo -e \"cloning default branch\"\r\n  git clone ${GIT_ADDRESS} .\r\n\r\nfi\r\n\r\npwd\r\nls -Al\r\n\r\necho \"Downloading yt-dlp\"\r\nwget https:\/\/github.com\/yt-dlp\/yt-dlp\/releases\/latest\/download\/yt-dlp\r\nchmod +x yt-dlp\r\n\r\nversion=$(wget -qO- https:\/\/dl.deno.land\/release-latest.txt)\r\nwget \"https:\/\/dl.deno.land\/release\/${version}\/deno-x86_64-unknown-linux-gnu.zip\"\r\nunzip deno-*.zip\r\nrm deno-*.zip\r\nchmod +x deno\r\n\r\ntouch logs.log\r\n\r\nif [ -f \/home\/container\/requirements.txt ]; then\r\n  pip install -U --prefix .local -r \/home\/container\/requirements.txt\r\nfi\r\n\r\necho \"Removing Egg JSON\"\r\nrm egg-youtube-downloader.json\r\n\r\nexport HOME=\/mnt\/server\r\n\r\necho -e \"install complete\"\r\nexit 0",
+      "script": "#!/bin/bash\r\napt update\r\napt-get install -y ffmpeg python3 python3-pip wget git unzip\r\necho \"Clearing Home-Folder\"\r\nrm -rf /home/container/\r\nrm -rf /mnt/server\r\nls -A\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\necho \"Download from GitHub\"\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n  GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\n## pull git python repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n  echo -e \"/mnt/server directory is not empty.\"\r\n  if [ -d .git ]; then\r\n    echo -e \".git directory exists\"\r\n    if [ -f .git/config ]; then\r\n      echo -e \"loading info from git config\"\r\n      ORIGIN=$(git config --get remote.origin.url)\r\n    else\r\n      echo -e \"files found with no git config\"\r\n      echo -e \"closing out without touching things to not break anything\"\r\n      exit 10\r\n    fi\r\n  fi\r\n\r\n  if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n    echo \"pulling latest from github\"\r\n    git pull\r\n  fi\r\nelse\r\n  echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n  echo -e \"cloning default branch\"\r\n  git clone ${GIT_ADDRESS} .\r\n\r\nfi\r\n\r\npwd\r\nls -Al\r\n\r\necho \"Downloading yt-dlp\"\r\nwget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp\r\nchmod +x yt-dlp\r\n\r\nversion=$(wget -qO- https://dl.deno.land/release-latest.txt)\r\nwget \"https://dl.deno.land/release/${version}/deno-x86_64-unknown-linux-gnu.zip\"\r\nunzip deno-*.zip\r\nrm deno-*.zip\r\nchmod +x deno\r\n\r\ntouch logs.log\r\n\r\nif [ -f /home/container/requirements.txt ]; then\r\n  pip install -U --prefix .local -r /home/container/requirements.txt\r\nfi\r\n\r\necho \"Removing Egg JSON\"\r\nrm egg-youtube-downloader.json\r\n\r\nexport HOME=/mnt/server\r\n\r\necho -e \"install complete\"\r\nexit 0",
       "container": "python:3.8-slim-bookworm",
       "entrypoint": "bash"
     }
   },
   "variables": [
     {
-      "name": "Git Repo Address",
-      "description": "Git repo to clone\r\n\r\nI.E. https:\/\/github.com\/parkervcp\/repo_name",
-      "env_variable": "GIT_ADDRESS",
-      "default_value": "https:\/\/github.com\/AlmarBlock\/YouTube-Downloader-Pterodactyl",
+      "name": "App py file",
+      "description": "The file that starts the App.",
+      "env_variable": "PY_FILE",
+      "default_value": "discordPart.py",
       "user_viewable": true,
       "user_editable": false,
-      "rules": "nullable|string",
-      "field_type": "text"
+      "rules": [
+        "required",
+        "string"
+      ],
+      "sort": 1
     },
     {
       "name": "Auto Update",
@@ -48,18 +54,24 @@
       "default_value": "1",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required|boolean",
-      "field_type": "text"
+      "rules": [
+        "required",
+        "boolean"
+      ],
+      "sort": 2
     },
     {
-      "name": "App py file",
-      "description": "The file that starts the App.",
-      "env_variable": "PY_FILE",
-      "default_value": "discordPart.py",
+      "name": "Debug Mode",
+      "description": "Enable debug mode.",
+      "env_variable": "DEBUG_MODE",
+      "default_value": "0",
       "user_viewable": true,
-      "user_editable": false,
-      "rules": "required|string",
-      "field_type": "text"
+      "user_editable": true,
+      "rules": [
+        "required",
+        "boolean"
+      ],
+      "sort": 6
     },
     {
       "name": "Discord Bot Token",
@@ -68,18 +80,24 @@
       "default_value": "",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "nullable|string",
-      "field_type": "text"
+      "rules": [
+        "nullable",
+        "string"
+      ],
+      "sort": 3
     },
     {
-      "name": "Debug Mode",
-      "description": "Enable debug mode.",
-      "env_variable": "DEBUG_MODE",
-      "default_value": "False",
+      "name": "Git Repo Address",
+      "description": "Git repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+      "env_variable": "GIT_ADDRESS",
+      "default_value": "https://github.com/AlmarBlock/YouTube-Downloader-Pterodactyl",
       "user_viewable": true,
-      "user_editable": true,
-      "rules": "nullable|boolean",
-      "field_type": "text"
+      "user_editable": false,
+      "rules": [
+        "nullable",
+        "string"
+      ],
+      "sort": 4
     },
     {
       "name": "Requirements file",
@@ -88,8 +106,11 @@
       "default_value": "requirements.txt",
       "user_viewable": true,
       "user_editable": false,
-      "rules": "required|string",
-      "field_type": "text"
+      "rules": [
+        "required",
+        "string"
+      ],
+      "sort": 5
     }
   ]
 }
