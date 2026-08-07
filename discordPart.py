@@ -48,12 +48,12 @@ def log(message, level="INFO"):
 
 def check_for_valid_folders():
     folders_missing = []
-    if not os.path.isdir("./mount"):
-        folders_missing.append("./mount")
-    if not os.path.isdir("./mount_temp"):
-        folders_missing.append("./mount_temp")
-    if not os.path.isdir("./mount_playlist"):
-        folders_missing.append("./mount_playlist")
+    if not os.path.isdir("/mount"):
+        folders_missing.append("/mount")
+    if not os.path.isdir("/mount_temp"):
+        folders_missing.append("/mount_temp")
+    if not os.path.isdir("/mount_playlist"):
+        folders_missing.append("/mount_playlist")
     if folders_missing:
         log("Missing folders: " + ", ".join(folders_missing))
         log("Ensure the folders are correctly configured in the Pterodactyl mounts.")
