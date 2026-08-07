@@ -72,6 +72,16 @@
       "field_type": "text"
     },
     {
+      "name": "Debug Mode",
+      "description": "Enable debug mode.",
+      "env_variable": "DEBUG_MODE",
+      "default_value": "False",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|boolean",
+      "field_type": "text"
+    },
+    {
       "name": "Requirements file",
       "description": "if there are other requirements files to choose from.",
       "env_variable": "REQUIREMENTS_FILE",

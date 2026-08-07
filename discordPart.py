@@ -1,7 +1,7 @@
 import discord
 import re
 from discord import app_commands, Webhook, Interaction
-from downloader import downloader_video
+from downloader import downloader_entry_point
 import urllib.request
 import json
 import urllib
@@ -10,6 +10,9 @@ import time
 import logging
 import sys
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DISCORD_BOT_TOKEN = os.environ.get('DISCORD_BOT_TOKEN')
 
@@ -33,20 +36,24 @@ logging.basicConfig(
     ]
 )
 
-def log(message):
-    with open('logs.log', 'a') as file:
-        file.write(message + '\n')
-        file.close()
-    print(message)
+def log(message, level="INFO"):
+    if level in ["INFO", "WARNING", "ERROR"]:
+        with open('logs.log', 'a') as file:
+            file.write(message + '\n')
+            file.close()
+    if level in ["ERROR", "INFO", "WARNING"]:
+        print(message)
+    if level == "DEBUG" and os.environ.get('DEBUG_MODE') == 'True':
+        print(message)
 
 def check_for_valid_folders():
     folders_missing = []
-    if not os.path.isdir("/mount"):
-        folders_missing.append("/mount")
-    if not os.path.isdir("/mount_temp"):
-        folders_missing.append("/mount_temp")
-    if not os.path.isdir("/mount_playlist"):
-        folders_missing.append("/mount_playlist")
+    if not os.path.isdir("./mount"):
+        folders_missing.append("./mount")
+    if not os.path.isdir("./mount_temp"):
+        folders_missing.append("./mount_temp")
+    if not os.path.isdir("./mount_playlist"):
+        folders_missing.append("./mount_playlist")
     if folders_missing:
         log("Missing folders: " + ", ".join(folders_missing))
         log("Ensure the folders are correctly configured in the Pterodactyl mounts.")
@@ -134,11 +141,26 @@ def run():
         log("Done! ✅")
 
     @tree.command()
-    async def download_video(interaction: Interaction, url: str, downloader: str = "ffmpeg", transcode: bool = False, ping: bool = False, playlist: str = None, staffel: int = None):
+    async def download_video(interaction: Interaction, url: str, downloader: str = "ffmpeg", transcode: bool = False, ping: bool = False, playlist: str = None, staffel: int = None, scale: str = "1080p"):
         """Download a video from YouTube"""
         global downloading
         global start_time
         global queue
+
+        match scale:
+            case "480p":
+                scale_width = 480
+            case "720p":
+                scale_width = 720
+            case "1080p":
+                scale_width = 1080
+            case "4K":
+                scale_width = 3840
+            case "8K":
+                scale_width = 7680
+            case _:
+                await interaction.followup.send(content="**Bitte gebe eine Gültige Breite an. (480p, 720p, 1080p, 4K, 8K)**")
+                return
 
         # Erste Antwort sofort senden
         await interaction.response.defer(ephemeral=False)
@@ -159,7 +181,7 @@ def run():
         url = get_usable_url(url)
 						
         if downloading:
-            queue.append((interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id))
+            queue.append((interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id, scale_width))
             embed = discord.Embed(
                 title="Ein Download ist bereits im Gange.",
                 description=f'Der Download von: **"{get_video_title([url, playlist, staffel])} ({url})"** ist an position: **{str(len(queue))}**\n\n{queue_to_string(queue)}',
@@ -189,7 +211,7 @@ def run():
         await interaction.followup.send(embed=embed)
         
         # Download im Hintergrund starten
-        asyncio.create_task(handle_download(interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id))
+        asyncio.create_task(handle_download(interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id, scale_width))
 
     @tree.command()
     async def queue(interaction: Interaction):
@@ -207,7 +229,7 @@ def run():
             await interaction.response.send_message(embed=embed, ephemeral=False)
             return
         else:
-            channel, url, downloader, transcode, ping, playlist, staffel, user_id = queue.pop(0)
+            channel, url, downloader, transcode, ping, playlist, staffel, user_id, scale_width = queue.pop(0)
             embed = discord.Embed(
                 title="❌ Video entfernt ❌",
                 description=f'Der Download von: **"{get_video_title([url, playlist, staffel])} ({url})"** wurde abgebrochen! \n\n{queue_to_string(queue)}',
@@ -228,19 +250,20 @@ def run():
 import concurrent.futures
 
 # Ändere die handle_download Funktion, um den Download in einem separaten Thread auszuführen
-async def handle_download(channel, url: str, downloader: str, transcode: bool, ping: bool, playlist: str, staffel: int, user_id: int):
+async def handle_download(channel, url: str, downloader: str, transcode: bool, ping: bool, playlist: str, staffel: int, user_id: int, scale_width: int):
     global start_time
     global end_time
     loop = asyncio.get_running_loop()
     with concurrent.futures.ThreadPoolExecutor() as pool:
         result = await loop.run_in_executor(
             pool,
-            downloader_video,
+            downloader_entry_point,
             url,
             downloader,
             transcode,
             playlist,
-            staffel
+            staffel,
+            scale_width
         )
 
     # Das Tupel auspacken
@@ -291,14 +314,14 @@ async def handle_download(channel, url: str, downloader: str, transcode: bool, p
     #except:
         #log("Could not send message")
     if len(queue) > 0:
-        channel, url, downloader, transcode, ping, playlist, staffel, user_id = queue.pop(0)
+        channel, url, downloader, transcode, ping, playlist, staffel, user_id, scale_width = queue.pop(0)
         log("Downloading video")
         try:
             embed = discord.Embed(title=get_video_title([url, playlist, staffel]), description="Der Download von: " + get_video_title([url, playlist, staffel]) + ' (' + url + ') hat begonnen.', color=0x00ff00)
         except:
             embed = discord.Embed(title="Download", description="Der Download hat begonnen. \n\n-# Der Title konnte nicht geladen werden.", color=0x00ff00)
         await channel.send(embed=embed)
-        asyncio.create_task(handle_download(channel, url, downloader, transcode, ping, playlist, staffel, user_id))
+        asyncio.create_task(handle_download(channel, url, downloader, transcode, ping, playlist, staffel, user_id, scale_width))
     else:
         global downloading
         downloading = False

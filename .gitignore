@@ -1,0 +1,5 @@
+.env
+mount/
+mount_temp/
+mount_playlist/
+yt-dlp
