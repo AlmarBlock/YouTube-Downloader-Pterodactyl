@@ -48,7 +48,7 @@ def download_using_yt_dlp(url, downloader, save_path, naming_convention):
     return [1, result]
     
 
-def downloader_entry_point(url, downloader, transcode, playlist, staffel, scale_width):
+def downloader_entry_point(url, downloader, transcode, playlist, staffel, scale_width, codec):
     global temp_folder
 
     if playlist and staffel:
@@ -70,12 +70,17 @@ def downloader_entry_point(url, downloader, transcode, playlist, staffel, scale_
     #Transcode to resolution
     for item in os.listdir(temp_folder):
         src = os.path.join(temp_folder, item)
-        if os.path.isfile(src) and item.endswith((".mp4", ".mkv", ".webm")):
-            transcode_video(src, scale_width)
+        if os.path.isfile(src) and item.endswith((".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv", ".m4v")):
+            resize_video(src, scale_width)
     
+    if transcode:
+        #Transcode to Codec
+        for item in os.listdir(temp_folder):
+            src = os.path.join(temp_folder, item)
+            if os.path.isfile(src) and item.endswith((".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv", ".m4v")):
+                transcode_video(src, codec=codec)
+        
     try:
-        if transcode:
-            log("\nTranscoding enabled, but transcoding functionality is not implemented in this version.", "WARNING")
         upload_video(playlist)
     except Exception as e:
         log("\nDownload Logs (stdout): " + return_val[1].stdout, "ERROR")
@@ -83,6 +88,56 @@ def downloader_entry_point(url, downloader, transcode, playlist, staffel, scale_
         log("\nError during upload: " + str(e), "ERROR")
         return 0, "Error during upload: " + str(e)
     return 1, None
+
+def transcode_video(input_file, codec="av1"):
+    log("\nTranscoding video (" + input_file + ") with the codec: " + codec, "INFO")
+    if get_video_codec(input_file) == codec:
+        log("Video is already in the desired codec: " + codec, "INFO")
+        return
+    output_file = os.path.splitext(input_file)[0] + "_transcoded.mp4"
+    command = ["ffmpeg", "-i", input_file, "-c:v", codec, "-c:a", "copy", output_file]
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        log("Transcoding failed: " + result.stderr, "ERROR")
+    else:
+        log("Transcoding successful: " + output_file, "INFO")
+        os.remove(input_file)  # Remove the original file after transcoding
+
+def resize_video(input_file, scale_width=1080):
+    log("\nTranscoding video (" + input_file + ") to " + str(scale_width) + "p", "INFO")
+    if get_video_resolution(input_file) == scale_width:
+        log("Video is already in the desired resolution: " + str(scale_width) + "p", "INFO")
+        return
+    output_file = os.path.splitext(input_file)[0] + "_" + str(scale_width) + "p.mp4"
+    command = ["ffmpeg", "-i", input_file, "-filter:v", f"scale=-1:{scale_width}", "-c:a", "copy", output_file]
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        log("Transcoding failed: " + result.stderr, "ERROR")
+    else:
+        log("Transcoding successful: " + output_file, "INFO")
+        os.remove(input_file)  # Remove the original file after transcoding
+
+def get_video_codec(input_file):
+    log("\nGetting video codec for file: " + input_file, "INFO")
+    command = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=codec_name", "-of", "default=noprint_wrappers=1:nokey=1", input_file]
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        log("Failed to get video codec: " + result.stderr, "ERROR")
+        return None
+    codec = result.stdout.strip()
+    log("Video codec: " + codec, "INFO")
+    return codec
+
+def get_video_resolution(input_file):
+    log("\nGetting video height for file: " + input_file, "INFO")
+    command = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=height", "-of", "default=noprint_wrappers=1:nokey=1", input_file]
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        log("Failed to get video height: " + result.stderr, "ERROR")
+        return None
+    height = result.stdout.strip()
+    log("Video height: " + height, "INFO")
+    return int(height)
 
 def download_video(url, downloader):
     save_path = temp_folder
@@ -98,17 +153,6 @@ def download_playlist(url, downloader, playlist, staffel):
     log("\nDownloading playlist (url: " + url + ")", "INFO")
     log("Playlist name: " + str(playlist), "INFO")
     return download_using_yt_dlp(url, downloader, save_path, naming_convention), save_path
-
-def transcode_video(input_file, scale_width=1080):
-    log("\nTranscoding video (input file: " + input_file + ")", "INFO")
-    output_file = os.path.splitext(input_file)[0] + "_" + str(scale_width) + ".mp4"
-    command = ["ffmpeg", "-i", input_file, "-filter:v", f"scale={scale_width}:-1", "-c:a", "copy", output_file]
-    result = subprocess.run(command, capture_output=True, text=True)
-    if result.returncode != 0:
-        log("Transcoding failed: " + result.stderr, "ERROR")
-    else:
-        log("Transcoding successful: " + output_file, "INFO")
-        os.remove(input_file)  # Remove the original file after transcoding
 
 def upload_video(playlistName):
     log("\nUploading video and thumbnail")
