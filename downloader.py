@@ -108,6 +108,9 @@ def resize_video(input_file, scale_width=1080):
     if get_video_resolution(input_file) == scale_width:
         log("Video is already in the desired resolution: " + str(scale_width) + "p", "INFO")
         return
+    if get_video_resolution(input_file) < scale_width:
+        log("Video resolution is lower than the desired resolution: " + str(scale_width) + "p. Skipping resizing.", "INFO")
+        return
     output_file = os.path.splitext(input_file)[0] + "_" + str(scale_width) + "p.mp4"
     command = ["ffmpeg", "-i", input_file, "-filter:v", f"scale=-1:{scale_width}", "-c:a", "copy", output_file]
     result = subprocess.run(command, capture_output=True, text=True)
