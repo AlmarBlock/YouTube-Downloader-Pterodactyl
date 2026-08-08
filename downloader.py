@@ -128,7 +128,7 @@ def get_video_codec(input_file):
         log("Failed to get video codec: " + result.stderr, "ERROR")
         return None
     codec = result.stdout.strip()
-    log("Video codec: " + codec, "INFO")
+    log("Video codec: " + codec, "DEBUG")
     return codec
 
 def get_video_resolution(input_file):
@@ -139,7 +139,7 @@ def get_video_resolution(input_file):
         log("Failed to get video height: " + result.stderr, "ERROR")
         return None
     height = result.stdout.strip()
-    log("Video height: " + height, "INFO")
+    log("Video height: " + height, "DEBUG")
     return int(height)
 
 def download_video(url, downloader):
