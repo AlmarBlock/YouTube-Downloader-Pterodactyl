@@ -236,7 +236,7 @@ def run():
         await interaction.followup.send(embed=embed)
         
         # Download im Hintergrund starten
-        asyncio.create_task(handle_download(interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id, scale_width))
+        asyncio.create_task(handle_download(interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id, scale_width, codec))
 
     @tree.command()
     async def queue(interaction: Interaction):
