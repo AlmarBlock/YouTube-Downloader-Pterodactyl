@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-if os.environ.get('DEV_ENV') == 'True':
+if os.environ.get('DEV_ENV') == '1':
     temp_folder = "./mount_temp/"
     mount_playlist = "./mount_playlist/"
     mount_videos = "./mount/"
@@ -23,7 +23,7 @@ def log(message, level="INFO"):
             file.close()
     if level in ["ERROR", "INFO", "WARNING"]:
         print(message)
-    if level == "DEBUG" and os.environ.get('DEBUG_MODE') == 'True':
+    if level == "DEBUG" and os.environ.get('DEBUG_MODE') == '1':
         print(message)
 
 # Logger konfigurieren
@@ -89,7 +89,7 @@ def downloader_entry_point(url, downloader, transcode, playlist, staffel, scale_
         return 0, "Error during upload: " + str(e)
     return 1, None
 
-def transcode_video(input_file, codec="av1"):
+def transcode_video(input_file, codec="h264"):
     log("\nTranscoding video (" + input_file + ") with the codec: " + codec, "INFO")
     if get_video_codec(input_file) == codec:
         log("Video is already in the desired codec: " + codec, "INFO")
@@ -121,7 +121,7 @@ def resize_video(input_file, scale_width=1080):
         os.remove(input_file)  # Remove the original file after transcoding
 
 def get_video_codec(input_file):
-    log("\nGetting video codec for file: " + input_file, "INFO")
+    log("\nGetting video codec for file: " + input_file, "DEBUG")
     command = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=codec_name", "-of", "default=noprint_wrappers=1:nokey=1", input_file]
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
@@ -132,7 +132,7 @@ def get_video_codec(input_file):
     return codec
 
 def get_video_resolution(input_file):
-    log("\nGetting video height for file: " + input_file, "INFO")
+    log("\nGetting video height for file: " + input_file, "DEBUG")
     command = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=height", "-of", "default=noprint_wrappers=1:nokey=1", input_file]
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:

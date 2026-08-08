@@ -149,7 +149,7 @@ def run():
         log("Done! ✅")
 
     @tree.command()
-    async def download_video(interaction: Interaction, url: str, downloader: str = "ffmpeg", transcode: bool = True, ping: bool = False, playlist: str = None, staffel: int = None, scale: str = "1080p", codec: str = "av1"):
+    async def download_video(interaction: Interaction, url: str, downloader: str = "ffmpeg", transcode: bool = True, ping: bool = False, playlist: str = None, staffel: int = None, scale: str = "1080p", codec: str = "h264"):
         """Download a video from YouTube"""
         global downloading
         global start_time
