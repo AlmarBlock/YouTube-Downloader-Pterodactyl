@@ -25,6 +25,8 @@ def log(message, level="INFO"):
         print(message)
     if level == "DEBUG" and os.environ.get('DEBUG_MODE') == '1':
         print(message)
+    if os.environ.get('DEBUG_MODE') == '1':
+        print("------------------------------------")
 
 # Logger konfigurieren
 logging.basicConfig(
@@ -56,13 +58,9 @@ def downloader_entry_point(url, downloader, transcode, playlist, staffel, scale_
     else:
         return_val = download_video(url, downloader)
 
-    log("------------------------------------", "DEBUG")
     log(str(return_val[0][0]), "DEBUG")
-    log("------------------------------------", "DEBUG")
     log(str(return_val[0][1]), "DEBUG")
-    log("------------------------------------", "DEBUG")
     log(str(return_val[1]), "DEBUG")
-    log("------------------------------------", "DEBUG")
 
     if return_val[0][0] == 0: #Check standart-out
         return 0, return_val[0][1] #Report Progress from YT-DLP 

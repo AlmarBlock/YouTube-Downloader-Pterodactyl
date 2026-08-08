@@ -43,12 +43,14 @@ def log(message, level="INFO"):
             file.close()
     if level in ["ERROR", "INFO", "WARNING"]:
         print(message)
-    if level == "DEBUG" and os.environ.get('DEBUG_MODE') == 'True':
+    if level == "DEBUG" and os.environ.get('DEBUG_MODE') == '1':
         print(message)
+    if os.environ.get('DEBUG_MODE') == '1':
+        print("------------------------------------")
 
 def check_for_valid_folders():
     folders_missing = []
-    if os.environ.get('DEV_ENV') == 'True':
+    if os.environ.get('DEV_ENV') == '1':
         if not os.path.isdir("./mount"):
             folders_missing.append("./mount")
         if not os.path.isdir("./mount_temp"):
