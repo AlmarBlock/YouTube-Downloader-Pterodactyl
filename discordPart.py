@@ -159,15 +159,15 @@ def run():
 
         match scale:
             case "480p":
-                scale_width = 480
+                scale_height = 480
             case "720p":
-                scale_width = 720
+                scale_height = 720
             case "1080p":
-                scale_width = 1080
+                scale_height = 1080
             case "4K":
-                scale_width = 3840
+                scale_height = 3840
             case "8K":
-                scale_width = 7680
+                scale_height = 7680
             case _:
                 await interaction.followup.send(content="**Bitte gebe eine Gültige Breite an. (480p, 720p, 1080p, 4K, 8K)**")
                 return
@@ -208,7 +208,7 @@ def run():
         url = get_usable_url(url)
 						
         if downloading:
-            queue.append((interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id, scale_width, codec))
+            queue.append((interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id, scale_height, codec))
             embed = discord.Embed(
                 title="Ein Download ist bereits im Gange.",
                 description=f'Der Download von: **"{get_video_title([url, playlist, staffel])} ({url})"** ist an position: **{str(len(queue))}**\n\n{queue_to_string(queue)}',
@@ -238,7 +238,7 @@ def run():
         await interaction.followup.send(embed=embed)
         
         # Download im Hintergrund starten
-        asyncio.create_task(handle_download(interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id, scale_width, codec))
+        asyncio.create_task(handle_download(interaction.channel, url, downloader, transcode, ping, playlist, staffel, interaction.user.id, scale_height, codec))
 
     @tree.command()
     async def queue(interaction: Interaction):
@@ -256,7 +256,7 @@ def run():
             await interaction.response.send_message(embed=embed, ephemeral=False)
             return
         else:
-            channel, url, downloader, transcode, ping, playlist, staffel, user_id, scale_width, codec = queue.pop(0)
+            channel, url, downloader, transcode, ping, playlist, staffel, user_id, scale_height, codec = queue.pop(0)
             embed = discord.Embed(
                 title="❌ Video entfernt ❌",
                 description=f'Der Download von: **"{get_video_title([url, playlist, staffel])} ({url})"** wurde abgebrochen! \n\n{queue_to_string(queue)}',
@@ -277,7 +277,7 @@ def run():
 import concurrent.futures
 
 # Ändere die handle_download Funktion, um den Download in einem separaten Thread auszuführen
-async def handle_download(channel, url: str, downloader: str, transcode: bool, ping: bool, playlist: str, staffel: int, user_id: int, scale_width: int, codec: str):
+async def handle_download(channel, url: str, downloader: str, transcode: bool, ping: bool, playlist: str, staffel: int, user_id: int, scale_height: int, codec: str):
     global start_time
     global end_time
     loop = asyncio.get_running_loop()
@@ -290,7 +290,7 @@ async def handle_download(channel, url: str, downloader: str, transcode: bool, p
             transcode,
             playlist,
             staffel,
-            scale_width,
+            scale_height,
             codec
         )
 
@@ -342,14 +342,14 @@ async def handle_download(channel, url: str, downloader: str, transcode: bool, p
     #except:
         #log("Could not send message")
     if len(queue) > 0:
-        channel, url, downloader, transcode, ping, playlist, staffel, user_id, scale_width, codec = queue.pop(0)
+        channel, url, downloader, transcode, ping, playlist, staffel, user_id, scale_height, codec = queue.pop(0)
         log("Downloading video")
         try:
             embed = discord.Embed(title=get_video_title([url, playlist, staffel]), description="Der Download von: " + get_video_title([url, playlist, staffel]) + ' (' + url + ') hat begonnen.', color=0x00ff00)
         except:
             embed = discord.Embed(title="Download", description="Der Download hat begonnen. \n\n-# Der Title konnte nicht geladen werden.", color=0x00ff00)
         await channel.send(embed=embed)
-        asyncio.create_task(handle_download(channel, url, downloader, transcode, ping, playlist, staffel, user_id, scale_width, codec))
+        asyncio.create_task(handle_download(channel, url, downloader, transcode, ping, playlist, staffel, user_id, scale_height, codec))
     else:
         global downloading
         downloading = False

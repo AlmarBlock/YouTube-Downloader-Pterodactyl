@@ -50,7 +50,7 @@ def download_using_yt_dlp(url, downloader, save_path, naming_convention):
     return [1, result]
     
 
-def downloader_entry_point(url, downloader, transcode, playlist, staffel, scale_width, codec):
+def downloader_entry_point(url, downloader, transcode, playlist, staffel, scale_height, codec):
     global temp_folder
 
     if playlist and staffel:
@@ -69,7 +69,7 @@ def downloader_entry_point(url, downloader, transcode, playlist, staffel, scale_
     for item in os.listdir(temp_folder):
         src = os.path.join(temp_folder, item)
         if os.path.isfile(src) and item.endswith((".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv", ".m4v")):
-            resize_video(src, scale_width)
+            resize_video(src, scale_height)
     
     if transcode:
         #Transcode to Codec
@@ -101,16 +101,18 @@ def transcode_video(input_file, codec="h264"):
         log("Transcoding successful: " + output_file, "INFO")
         os.remove(input_file)  # Remove the original file after transcoding
 
-def resize_video(input_file, scale_width=1080):
-    log("\nTranscoding video (" + input_file + ") to " + str(scale_width) + "p", "INFO")
-    if get_video_resolution(input_file) == scale_width:
-        log("Video is already in the desired resolution: " + str(scale_width) + "p", "INFO")
+def resize_video(input_file, scale_height=1080):
+    log("\nTranscoding video (" + input_file + ") to " + str(scale_height) + "p", "INFO")
+    if get_video_resolution(input_file) == scale_height:
+        log("Video is already in the desired resolution: " + str(scale_height) + "p", "INFO")
         return
-    if get_video_resolution(input_file) < scale_width:
-        log("Video resolution is lower than the desired resolution: " + str(scale_width) + "p. Skipping resizing.", "INFO")
+    if get_video_resolution(input_file) < scale_height:
+        log("Video resolution is lower than the desired resolution: " + str(scale_height) + "p. Skipping resizing.", "INFO")
         return
-    output_file = os.path.splitext(input_file)[0] + "_" + str(scale_width) + "p.mp4"
-    command = ["ffmpeg", "-i", input_file, "-filter:v", f"scale=-1:{scale_width}", "-c:a", "copy", output_file]
+    output_file = os.path.splitext(input_file)[0] + "_" + str(scale_height) + "p.mp4"
+    vf = f"scale=trunc((iw*{scale_height}/ih)/2)*2:{scale_height}"
+    command = ["ffmpeg", "-i", input_file, "-vf", vf, "-c:a", "copy", output_file]
+    #command = ["ffmpeg", "-i", input_file, "-filter:v", f"scale=-1:{scale_height}", "-c:a", "copy", output_file]
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
         log("Transcoding failed: " + result.stderr, "ERROR")
