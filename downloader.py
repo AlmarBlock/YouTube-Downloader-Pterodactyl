@@ -19,7 +19,7 @@ else:
 def log(message, level="INFO"):
     if level in ["INFO", "WARNING", "ERROR"]:
         with open('logs.log', 'a') as file:
-            file.write(message + '\n')
+            file.write(message + '')
             file.close()
     if level in ["ERROR", "INFO", "WARNING"]:
         print(message)
@@ -81,14 +81,15 @@ def downloader_entry_point(url, downloader, transcode, playlist, staffel, scale_
     try:
         upload_video(playlist)
     except Exception as e:
-        log("\nDownload Logs (stdout): " + return_val[1].stdout, "ERROR")
-        log("\nDownload Logs (stderr): " + return_val[1].stderr, "ERROR")
-        log("\nError during upload: " + str(e), "ERROR")
+        log("ownload Logs (stdout): " + return_val[1].stdout, "ERROR")
+        log("ownload Logs (stderr): " + return_val[1].stderr, "ERROR")
+        log("rror during upload: " + str(e), "ERROR")
         return 0, "Error during upload: " + str(e)
     return 1, None
 
 def transcode_video(input_file, codec="h264"):
-    log("\nTranscoding video (" + input_file + ") with the codec: " + codec, "INFO")
+    log("Transcoding video (" + input_file + ") with the codec: " + codec, "INFO")
+    #TODO - Set AV1 as default codec and add overwrite option for h264 if user wants to transcode to h264
     if get_video_codec(input_file) == codec:
         log("Video is already in the desired codec: " + codec, "INFO")
         return
@@ -97,12 +98,13 @@ def transcode_video(input_file, codec="h264"):
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
         log("Transcoding failed: " + result.stderr, "ERROR")
+        os.remove(output_file)  # Remove the output file if transcoding failed
     else:
         log("Transcoding successful: " + output_file, "INFO")
         os.remove(input_file)  # Remove the original file after transcoding
 
 def resize_video(input_file, scale_height=1080):
-    log("\nTranscoding video (" + input_file + ") to " + str(scale_height) + "p", "INFO")
+    log("Transcoding video (" + input_file + ") to " + str(scale_height) + "p", "INFO")
     if get_video_resolution(input_file) == scale_height:
         log("Video is already in the desired resolution: " + str(scale_height) + "p", "INFO")
         return
@@ -116,12 +118,13 @@ def resize_video(input_file, scale_height=1080):
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
         log("Transcoding failed: " + result.stderr, "ERROR")
+        os.remove(output_file)  # Remove the output file if transcoding failed
     else:
         log("Transcoding successful: " + output_file, "INFO")
         os.remove(input_file)  # Remove the original file after transcoding
 
 def get_video_codec(input_file):
-    log("\nGetting video codec for file: " + input_file, "DEBUG")
+    log("Getting video codec for file: " + input_file, "DEBUG")
     command = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=codec_name", "-of", "default=noprint_wrappers=1:nokey=1", input_file]
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
@@ -132,7 +135,7 @@ def get_video_codec(input_file):
     return codec
 
 def get_video_resolution(input_file):
-    log("\nGetting video height for file: " + input_file, "DEBUG")
+    log("Getting video height for file: " + input_file, "DEBUG")
     command = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=height", "-of", "default=noprint_wrappers=1:nokey=1", input_file]
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
@@ -145,7 +148,7 @@ def get_video_resolution(input_file):
 def download_video(url, downloader):
     save_path = temp_folder
     naming_convention = "%(title)s.%(ext)s"
-    log("\nDownloading video (url: " + url + ")", "INFO")
+    log("Downloading video (url: " + url + ")", "INFO")
     return download_using_yt_dlp(url, downloader, save_path, naming_convention), save_path
 
 def download_playlist(url, downloader, playlist, staffel):
@@ -153,12 +156,12 @@ def download_playlist(url, downloader, playlist, staffel):
     command = ["mkdir", "-p", save_path]
     subprocess.run(command, capture_output=False, text=True)
     naming_convention = "%(playlist_index)02d - %(title)s.%(ext)s"
-    log("\nDownloading playlist (url: " + url + ")", "INFO")
+    log("Downloading playlist (url: " + url + ")", "INFO")
     log("Playlist name: " + str(playlist), "INFO")
     return download_using_yt_dlp(url, downloader, save_path, naming_convention), save_path
 
 def upload_video(playlistName):
-    log("\nUploading video and thumbnail")
+    log("Uploading video and thumbnail")
     if playlistName:
         upload_location = mount_playlist + playlistName + "/"
         local_location = temp_folder + playlistName + "/"
@@ -192,4 +195,4 @@ def upload_video(playlistName):
         elif os.path.isdir(item_path):
             shutil.rmtree(item_path)
 
-    log("\nUpload Done", "INFO")
+    log("Upload Done", "INFO")
